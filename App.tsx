@@ -4,7 +4,7 @@ import { MessageFeed } from './components/MessageFeed';
 import { WalletConnect } from './components/WalletConnect';
 import { Message, OracleState } from './types';
 import { getOracleWisdom, generateRandomVision } from './services/geminiService';
-import { v4 as uuidv4 } from 'uuid'; // Actually we don't have uuid package, use simple random
+
 // Since we can't use uuid package without adding to package.json which I can't control fully here, helper fn:
 const generateId = () => Math.random().toString(36).substr(2, 9);
 
@@ -85,7 +85,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white overflow-hidden relative selection:bg-cyan-500 selection:text-black">
+    <div className="min-h-screen bg-[#050505] text-white overflow-x-hidden relative selection:bg-cyan-500 selection:text-black">
       
       {/* Background Grid/Effect */}
       <div className="fixed inset-0 pointer-events-none z-0" 
@@ -103,38 +103,38 @@ const App: React.FC = () => {
         balance={balance}
       />
 
-      <main className="relative z-10 container mx-auto px-4 min-h-screen flex flex-col items-center justify-center py-20">
+      <main className="relative z-10 container mx-auto px-4 min-h-screen flex flex-col items-center justify-center py-6 md:py-20">
         
         {/* Header */}
-        <header className="text-center mb-10 space-y-2">
-            <h1 className="text-4xl md:text-6xl font-cyber font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-gray-100 via-cyan-200 to-gray-400">
+        <header className="text-center mb-6 md:mb-10 space-y-2 mt-10 md:mt-0">
+            <h1 className="text-3xl md:text-6xl font-cyber font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-gray-100 via-cyan-200 to-gray-400">
                 BU KE QI SYNDICATE
             </h1>
-            <p className="text-cyan-500/60 font-mono tracking-[0.5em] text-sm">YOU ARE WELCOME</p>
+            <p className="text-cyan-500/60 font-mono tracking-[0.5em] text-xs md:text-sm">YOU ARE WELCOME</p>
         </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 w-full max-w-6xl items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12 w-full max-w-6xl items-center">
             
-            {/* Left: Input Form */}
-            <div className="lg:col-span-1 order-2 lg:order-1 flex flex-col justify-center">
-                <div className="glass-panel p-6 rounded-2xl relative group">
+            {/* Left: Input Form - Order 2 on Mobile (Below Oracle) */}
+            <div className="lg:col-span-1 order-2 lg:order-1 flex flex-col justify-center w-full">
+                <div className="glass-panel p-5 md:p-6 rounded-2xl relative group w-full">
                     <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500 to-purple-600 rounded-2xl opacity-20 group-hover:opacity-40 transition duration-500 blur"></div>
                     <div className="relative bg-black rounded-xl p-4">
-                        <h2 className="text-xl font-oracle mb-6 text-gray-200 border-b border-gray-800 pb-2">Consult The Oracle</h2>
+                        <h2 className="text-lg md:text-xl font-oracle mb-6 text-gray-200 border-b border-gray-800 pb-2">Consult The Oracle</h2>
                         
-                        <form onSubmit={handleSubmit} className="space-y-5">
+                        <form onSubmit={handleSubmit} className="space-y-4 md:space-y-5">
                             <div>
-                                <label className="block text-xs font-mono text-gray-500 mb-1">YOUR MESSAGE (ANONYMOUS)</label>
+                                <label className="block text-[10px] md:text-xs font-mono text-gray-500 mb-1">YOUR MESSAGE (ANONYMOUS)</label>
                                 <textarea 
                                     value={input}
                                     onChange={(e) => setInput(e.target.value)}
-                                    className="w-full bg-gray-900/50 border border-gray-700 rounded-lg p-3 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 transition-all font-oracle h-24 resize-none"
+                                    className="w-full bg-gray-900/50 border border-gray-700 rounded-lg p-3 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 transition-all font-oracle h-20 md:h-24 resize-none"
                                     placeholder="Speak your truth..."
                                 />
                             </div>
                             
                             <div>
-                                <label className="block text-xs font-mono text-gray-500 mb-1">HOW SHALL WE HELP?</label>
+                                <label className="block text-[10px] md:text-xs font-mono text-gray-500 mb-1">HOW SHALL WE HELP?</label>
                                 <select 
                                     value={helpMethod}
                                     onChange={(e) => setHelpMethod(e.target.value)}
@@ -151,7 +151,7 @@ const App: React.FC = () => {
                             <button 
                                 type="submit"
                                 disabled={!walletConnected || oracleState !== OracleState.IDLE}
-                                className={`w-full py-4 rounded-lg font-cyber font-bold tracking-widest uppercase transition-all duration-300 relative overflow-hidden group
+                                className={`w-full py-3 md:py-4 rounded-lg font-cyber font-bold tracking-widest uppercase transition-all duration-300 relative overflow-hidden group text-sm md:text-base
                                     ${!walletConnected ? 'bg-gray-800 text-gray-500 cursor-not-allowed' : 
                                       oracleState !== OracleState.IDLE ? 'bg-purple-900/50 text-purple-300 cursor-wait' :
                                       'bg-white text-black hover:bg-cyan-50 hover:shadow-[0_0_30px_rgba(0,255,255,0.4)]'
@@ -162,27 +162,27 @@ const App: React.FC = () => {
                                 </span>
                             </button>
                             <p className="text-[10px] text-center text-gray-600 mt-2 font-mono">
-                                *One request is chosen daily by the Syndicate Algorithm.
+                                *One request chosen daily.
                             </p>
                         </form>
                     </div>
                 </div>
             </div>
 
-            {/* Center: The Oracle */}
-            <div className="lg:col-span-1 order-1 lg:order-2 flex flex-col items-center justify-center">
+            {/* Center: The Oracle - Order 1 on Mobile (Top) */}
+            <div className="lg:col-span-1 order-1 lg:order-2 flex flex-col items-center justify-center w-full">
                 <CrystalBall state={oracleState} />
                 
-                <div className="mt-8 text-center min-h-[80px] w-full max-w-sm">
-                    <p className={`font-oracle text-lg md:text-xl transition-all duration-1000 
+                <div className="mt-4 md:mt-8 text-center min-h-[60px] md:min-h-[80px] w-full max-w-sm px-4">
+                    <p className={`font-oracle text-base md:text-xl transition-all duration-1000 leading-tight
                         ${oracleState === OracleState.SPEAKING ? 'text-yellow-100 drop-shadow-[0_0_10px_rgba(255,215,0,0.8)]' : 'text-cyan-100/80 drop-shadow-[0_0_5px_rgba(0,255,255,0.5)]'}`}>
                         "{oracleMessage}"
                     </p>
                 </div>
             </div>
 
-            {/* Right: Message Stream */}
-            <div className="lg:col-span-1 order-3 lg:order-3">
+            {/* Right: Message Stream - Order 3 on Mobile (Bottom) */}
+            <div className="lg:col-span-1 order-3 lg:order-3 w-full flex justify-center">
                 <MessageFeed messages={messages} />
             </div>
 
@@ -190,7 +190,7 @@ const App: React.FC = () => {
       </main>
       
       {/* Footer */}
-      <footer className="absolute bottom-4 w-full text-center text-gray-700 text-xs font-mono">
+      <footer className="relative bottom-4 w-full text-center text-gray-700 text-[10px] md:text-xs font-mono mt-8 md:mt-0 pb-4 md:pb-0">
         BU KE QI SYNDICATE © 2077 // DECENTRALIZED BENEVOLENCE PROTOCOL
       </footer>
     </div>

@@ -96,14 +96,14 @@ export const CrystalBall: React.FC<CrystalBallProps> = ({ state }) => {
                     : 'border-cyan-500/30';
 
   return (
-    <div className="relative flex items-center justify-center w-[300px] h-[300px] md:w-[400px] md:h-[400px]">
+    <div className="relative flex items-center justify-center w-[280px] h-[280px] sm:w-[320px] sm:h-[320px] md:w-[400px] md:h-[400px]">
         {/* Outer Rings */}
         <div className={`absolute inset-0 rounded-full border border-opacity-20 animate-spin-slow duration-[20s] ${borderClass}`} style={{ transform: 'rotateX(60deg)'}}></div>
         <div className={`absolute inset-4 rounded-full border border-opacity-20 animate-reverse-spin duration-[15s] ${borderClass}`}></div>
         
         {/* The Crystal Ball Container */}
         <div 
-            className={`relative w-64 h-64 md:w-80 md:h-80 rounded-full overflow-hidden backdrop-blur-sm transition-all duration-1000 ${glowClass}`}
+            className={`relative w-60 h-60 sm:w-64 sm:h-64 md:w-80 md:h-80 rounded-full overflow-hidden backdrop-blur-sm transition-all duration-1000 ${glowClass}`}
             style={{
                 background: 'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.1) 0%, rgba(0,0,0,0.8) 80%)',
                 boxShadow: 'inset -20px -20px 50px rgba(0,0,0,0.8), inset 20px 20px 50px rgba(255,255,255,0.1)'

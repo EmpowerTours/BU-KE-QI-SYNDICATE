@@ -7,7 +7,7 @@ interface MessageFeedProps {
 
 export const MessageFeed: React.FC<MessageFeedProps> = ({ messages }) => {
   return (
-    <div className="w-full max-w-md h-[400px] relative overflow-hidden glass-panel rounded-xl p-4 flex flex-col">
+    <div className="w-full max-w-md h-[320px] md:h-[400px] relative overflow-hidden glass-panel rounded-xl p-4 flex flex-col">
       <div className="absolute top-0 left-0 w-full h-12 bg-gradient-to-b from-[#050505] to-transparent z-10 pointer-events-none"></div>
       
       <h3 className="text-center font-cyber text-cyan-400 tracking-widest text-xs uppercase mb-4 opacity-70">
