@@ -1,0 +1,109 @@
+
+import React from 'react';
+import { ChartData } from '../types';
+
+interface DashboardSimulationProps {
+  data: ChartData;
+}
+
+export const DashboardSimulation: React.FC<DashboardSimulationProps> = ({ data }) => {
+  // Defensive coding: Ensure data.data exists and is an array. Default to empty array if not.
+  const chartPoints = Array.isArray(data?.data) ? data.data : [];
+  
+  // If absolutely no data points, show a glitch effect message instead of crashing
+  if (chartPoints.length === 0) {
+    return (
+        <div className="w-full mt-6 p-4 border border-red-900/50 bg-red-900/10 rounded text-red-400 font-mono text-xs animate-pulse">
+            [SIGNAL_LOST]: VISUALIZATION_DATA_STREAM_EMPTY
+        </div>
+    );
+  }
+
+  // Calculate max value for scaling (avoid divide by zero)
+  const maxValue = Math.max(...chartPoints.map(d => d.value || 0)) || 100;
+
+  return (
+    <div className="w-full mt-6 animate-in fade-in slide-in-from-bottom duration-700">
+      <div className="glass-panel p-6 rounded-xl border border-cyan-500/30 shadow-[0_0_40px_rgba(0,255,255,0.1)] relative overflow-hidden">
+        
+        {/* Holographic Scanline Overlay */}
+        <div className="absolute inset-0 bg-[linear-gradient(transparent_50%,rgba(0,255,255,0.05)_50%)] bg-[length:100%_4px] pointer-events-none"></div>
+        
+        {/* Header */}
+        <div className="flex justify-between items-center mb-6">
+            <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
+                <h3 className="font-cyber text-yellow-400 tracking-widest text-sm uppercase">
+                    NEURAL PREDICTION // {data?.title || "ESTIMATION"}
+                </h3>
+            </div>
+            <div className="text-[9px] font-mono text-gray-500 bg-black/40 px-2 py-1 rounded border border-gray-800">
+                SIMULATION MODE • <span className="text-orange-500">VERIFY ON CHAIN BELOW</span>
+            </div>
+        </div>
+
+        {/* Chart Container */}
+        <div className="h-48 md:h-64 flex items-end justify-between gap-2 md:gap-4 relative z-10 px-2 pb-2">
+            
+            {/* Y-Axis Grid (Fake) */}
+            <div className="absolute inset-0 flex flex-col justify-between pointer-events-none opacity-20">
+                <div className="w-full h-px bg-cyan-300"></div>
+                <div className="w-full h-px bg-cyan-300"></div>
+                <div className="w-full h-px bg-cyan-300"></div>
+                <div className="w-full h-px bg-cyan-300"></div>
+                <div className="w-full h-px bg-cyan-300"></div>
+            </div>
+
+            {/* Bars */}
+            {chartPoints.map((item, index) => {
+                const val = item.value || 0;
+                const heightPercentage = Math.max(5, (val / maxValue) * 100);
+                // Staggered animation delay
+                const delay = index * 100;
+                
+                return (
+                    <div key={index} className="flex flex-col items-center justify-end h-full flex-1 group min-w-0">
+                         {/* Value Tooltip on Hover */}
+                         <div className="mb-2 opacity-0 group-hover:opacity-100 transition-opacity text-[10px] font-mono text-cyan-300 bg-black/80 px-2 py-1 rounded border border-cyan-900 absolute -top-8 z-20 pointer-events-none whitespace-nowrap">
+                            {val.toLocaleString()} {data?.yAxisLabel || ''}
+                        </div>
+                        
+                        {/* The Bar */}
+                        <div 
+                            className="w-full max-w-[40px] bg-gradient-to-t from-cyan-900/20 via-cyan-500/40 to-white/60 rounded-t-sm relative transition-all duration-500 hover:brightness-125 cursor-crosshair opacity-80"
+                            style={{ 
+                                height: `${heightPercentage}%`,
+                                animation: `growUp 1s cubic-bezier(0.4, 0, 0.2, 1) forwards ${delay}ms`
+                            }}
+                        >
+                            {/* Glowing Top Edge */}
+                            <div className="absolute top-0 left-0 right-0 h-0.5 bg-white shadow-[0_0_10px_#fff,0_0_20px_#0ff]"></div>
+                        </div>
+
+                        {/* X-Axis Label */}
+                        <div className="mt-2 text-[8px] md:text-[10px] font-mono text-gray-500 uppercase truncate w-full text-center">
+                            {item.label || '-'}
+                        </div>
+                    </div>
+                )
+            })}
+        </div>
+
+        {/* Footer info */}
+        <div className="mt-4 pt-2 border-t border-cyan-500/10 flex justify-between items-center text-[9px] text-gray-600 font-mono">
+             <div className="flex items-center gap-1">
+                 <span className="text-yellow-600">⚠ DATA GENERATED BY AI</span>
+             </div>
+             <div>ID: {Math.random().toString(36).substr(2, 6).toUpperCase()}</div>
+        </div>
+      </div>
+      
+      <style>{`
+        @keyframes growUp {
+            from { height: 0%; opacity: 0; }
+            to { opacity: 1; }
+        }
+      `}</style>
+    </div>
+  );
+};

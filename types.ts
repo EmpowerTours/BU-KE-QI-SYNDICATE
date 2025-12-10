@@ -1,12 +1,15 @@
+
 export interface Message {
   id: string;
   text: string;
-  methodOfHelp: string; // The "way they wish to be helped"
+  methodOfHelp: string;
   timestamp: number;
   isOracleResponse?: boolean;
-  walletAddress?: string; // Masked address
-  isChosen?: boolean; // If this message was selected by the Oracle
-  prophecy?: string; // The Oracle's reason for choosing this
+  walletAddress?: string;
+  isChosen?: boolean;
+  prophecy?: string;
+  rewardAmount?: number;
+  payoutTxHash?: string;
 }
 
 export enum OracleState {
@@ -16,6 +19,22 @@ export enum OracleState {
   SPEAKING = 'SPEAKING',
 }
 
+export interface ChartData {
+  title: string;
+  type: 'bar' | 'line';
+  data: { label: string; value: number }[];
+  yAxisLabel?: string;
+}
+
 export interface OracleResponse {
-  text: string;
+  speech: string;
+  visualization?: ChartData;
+  sqlQuery?: string;
+}
+
+export interface WalletState {
+  address: string | null;
+  balance: string;
+  isConnected: boolean;
+  isLoading: boolean;
 }
