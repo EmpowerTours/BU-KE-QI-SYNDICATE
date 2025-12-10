@@ -3,39 +3,41 @@ import { CrystalBall } from './components/CrystalBall';
 import { MessageFeed } from './components/MessageFeed';
 import { WalletConnect } from './components/WalletConnect';
 import { Message, OracleState } from './types';
-import { getOracleWisdom, generateRandomVision } from './services/geminiService';
+import { getOracleWisdom, selectChosenOne } from './services/geminiService';
 
-// Since we can't use uuid package without adding to package.json which I can't control fully here, helper fn:
 const generateId = () => Math.random().toString(36).substr(2, 9);
-
 const MOCK_WALLET = "0x7A...9F2B";
+const STORAGE_KEY = 'bukeqi_oracle_messages';
 
 const App: React.FC = () => {
-  const [messages, setMessages] = useState<Message[]>([
-    { id: '1', text: "I wish for guidance in my startup journey.", methodOfHelp: "Mentorship", timestamp: Date.now() - 100000, walletAddress: "0x32...88A" },
-    { id: '2', text: "Lost my keys, need luck finding them.", methodOfHelp: "Luck", timestamp: Date.now() - 500000, walletAddress: "0xBB...11C" },
-    { id: '3', text: "Seeking the next big alpha.", methodOfHelp: "Knowledge", timestamp: Date.now() - 800000, walletAddress: "ANON" },
-  ]);
+  // Load initial state from local storage or use defaults
+  const [messages, setMessages] = useState<Message[]>(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error("Failed to parse saved messages");
+      }
+    }
+    return [
+      { id: '1', text: "I wish for guidance in my startup journey.", methodOfHelp: "Mentorship", timestamp: Date.now() - 100000, walletAddress: "0x32...88A" },
+      { id: '2', text: "Lost my keys, need luck finding them.", methodOfHelp: "Luck", timestamp: Date.now() - 500000, walletAddress: "0xBB...11C" },
+      { id: '3', text: "Seeking the next big alpha.", methodOfHelp: "Knowledge", timestamp: Date.now() - 800000, walletAddress: "ANON" },
+    ];
+  });
   
   const [walletConnected, setWalletConnected] = useState(false);
-  const [balance, setBalance] = useState(100); // 100 MON mock
+  const [balance, setBalance] = useState(100); 
   const [input, setInput] = useState('');
   const [helpMethod, setHelpMethod] = useState('');
   const [oracleState, setOracleState] = useState<OracleState>(OracleState.IDLE);
   const [oracleMessage, setOracleMessage] = useState<string>("The Syndicate awaits your tribute.");
-  const bottomRef = useRef<HTMLDivElement>(null);
 
-  // Background ambient visions
+  // Persistence Effect
   useEffect(() => {
-    const interval = setInterval(async () => {
-        if (oracleState === OracleState.IDLE && Math.random() > 0.7) {
-            // Occasionally show a random vision text if idle
-            // const vision = await generateRandomVision();
-            // setOracleMessage(vision);
-        }
-    }, 10000);
-    return () => clearInterval(interval);
-  }, [oracleState]);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+  }, [messages]);
 
   const handleConnect = () => {
     setWalletConnected(true);
@@ -53,7 +55,6 @@ const App: React.FC = () => {
         return;
     }
 
-    // Payment Animation logic
     setBalance(prev => prev - 10);
     setOracleState(OracleState.PROCESSING);
     setOracleMessage("Processing tribute... deciphering intent...");
@@ -66,22 +67,49 @@ const App: React.FC = () => {
       walletAddress: MOCK_WALLET
     };
 
-    // Add to feed immediately
     setMessages(prev => [newMessage, ...prev]);
     setInput('');
     setHelpMethod('');
 
-    // Call Gemini
+    // Call Gemini for immediate acknowledgement
     const wisdom = await getOracleWisdom(newMessage.text, newMessage.methodOfHelp);
     
     setOracleState(OracleState.SPEAKING);
     setOracleMessage(wisdom);
 
-    // Reset state after speaking
     setTimeout(() => {
         setOracleState(OracleState.IDLE);
         setOracleMessage("The Syndicate watches. One will be chosen at day's end.");
     }, 8000);
+  };
+
+  const handleClosingRitual = async () => {
+    if (messages.length === 0) return;
+    
+    const confirmRitual = window.confirm("Initiate the Closing Ritual? The Oracle will judge all souls now.");
+    if (!confirmRitual) return;
+
+    setOracleState(OracleState.PROCESSING);
+    setOracleMessage("Commencing final judgment of the cycle...");
+
+    // Simulate delay for dramatic effect
+    await new Promise(r => setTimeout(r, 2000));
+
+    const result = await selectChosenOne(messages);
+    
+    if (result.chosenId) {
+      setMessages(prev => prev.map(msg => 
+        msg.id === result.chosenId 
+          ? { ...msg, isChosen: true, prophecy: result.prophecy }
+          : { ...msg, isChosen: false } // Reset others
+      ));
+      
+      setOracleState(OracleState.SPEAKING);
+      setOracleMessage(`THE CHOSEN ONE FOUND: ${result.prophecy}`);
+    } else {
+      setOracleState(OracleState.IDLE);
+      setOracleMessage("The stars are silent. No one was chosen today.");
+    }
   };
 
   return (
@@ -115,7 +143,7 @@ const App: React.FC = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12 w-full max-w-6xl items-center">
             
-            {/* Left: Input Form - Order 2 on Mobile (Below Oracle) */}
+            {/* Left: Input Form */}
             <div className="lg:col-span-1 order-2 lg:order-1 flex flex-col justify-center w-full">
                 <div className="glass-panel p-5 md:p-6 rounded-2xl relative group w-full">
                     <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500 to-purple-600 rounded-2xl opacity-20 group-hover:opacity-40 transition duration-500 blur"></div>
@@ -169,7 +197,7 @@ const App: React.FC = () => {
                 </div>
             </div>
 
-            {/* Center: The Oracle - Order 1 on Mobile (Top) */}
+            {/* Center: The Oracle */}
             <div className="lg:col-span-1 order-1 lg:order-2 flex flex-col items-center justify-center w-full">
                 <CrystalBall state={oracleState} />
                 
@@ -181,7 +209,7 @@ const App: React.FC = () => {
                 </div>
             </div>
 
-            {/* Right: Message Stream - Order 3 on Mobile (Bottom) */}
+            {/* Right: Message Stream */}
             <div className="lg:col-span-1 order-3 lg:order-3 w-full flex justify-center">
                 <MessageFeed messages={messages} />
             </div>
@@ -190,8 +218,16 @@ const App: React.FC = () => {
       </main>
       
       {/* Footer */}
-      <footer className="relative bottom-4 w-full text-center text-gray-700 text-[10px] md:text-xs font-mono mt-8 md:mt-0 pb-4 md:pb-0">
-        BU KE QI SYNDICATE © 2077 // DECENTRALIZED BENEVOLENCE PROTOCOL
+      <footer className="relative w-full flex flex-col items-center justify-center text-gray-700 text-[10px] md:text-xs font-mono pb-8 gap-4">
+        <div>BU KE QI SYNDICATE © 2077 // DECENTRALIZED BENEVOLENCE PROTOCOL</div>
+        {walletConnected && (
+            <button 
+                onClick={handleClosingRitual}
+                className="text-gray-800 hover:text-red-500 transition-colors uppercase tracking-widest text-[9px] border border-gray-800 hover:border-red-900 px-3 py-1 rounded"
+            >
+                [ Simulate Closing Ritual ]
+            </button>
+        )}
       </footer>
     </div>
   );

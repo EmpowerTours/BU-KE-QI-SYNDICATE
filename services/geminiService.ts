@@ -1,4 +1,5 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, Type } from "@google/genai";
+import { Message } from "../types";
 
 const apiKey = process.env.API_KEY || ''; // In a real app, ensure this is set
 const ai = new GoogleGenAI({ apiKey });
@@ -51,3 +52,41 @@ export const generateRandomVision = async (): Promise<string> => {
         return "Silence...";
     }
 }
+
+export const selectChosenOne = async (messages: Message[]): Promise<{ chosenId: string; prophecy: string }> => {
+  if (!apiKey || messages.length === 0) {
+    return { chosenId: '', prophecy: 'The void is empty.' };
+  }
+
+  try {
+    // Simplify messages for the prompt to save tokens
+    const simplifiedMessages = messages.map(m => ({ id: m.id, text: m.text, method: m.methodOfHelp }));
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: `Here are the pleas from mortals today: ${JSON.stringify(simplifiedMessages)}. 
+      Select one message that resonates most with "The Flow". 
+      Return the ID of the chosen one and a mystical reason why (prophecy).`,
+      config: {
+        systemInstruction: "You are the Oracle Judge. Pick one winner. Be cryptic but decisive.",
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            chosenId: { type: Type.STRING },
+            prophecy: { type: Type.STRING }
+          },
+          required: ["chosenId", "prophecy"]
+        }
+      }
+    });
+
+    if (response.text) {
+      return JSON.parse(response.text);
+    }
+    return { chosenId: '', prophecy: 'The mists obscure the choice.' };
+  } catch (error) {
+    console.error("Selection Error:", error);
+    return { chosenId: '', prophecy: 'Interference prevents selection.' };
+  }
+};

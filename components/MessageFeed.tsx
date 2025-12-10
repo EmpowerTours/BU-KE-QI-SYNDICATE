@@ -21,25 +21,40 @@ export const MessageFeed: React.FC<MessageFeedProps> = ({ messages }) => {
         {messages.map((msg) => (
           <div 
             key={msg.id} 
-            className={`relative p-3 rounded border border-white/5 bg-black/40 transition-all duration-500 animate-[float_6s_ease-in-out_infinite] hover:border-cyan-500/30 group`}
+            className={`relative p-3 rounded transition-all duration-500 animate-[float_6s_ease-in-out_infinite] group
+                ${msg.isChosen 
+                    ? 'border border-yellow-500/50 bg-yellow-900/20 shadow-[0_0_20px_rgba(255,215,0,0.2)] z-10' 
+                    : 'border border-white/5 bg-black/40 hover:border-cyan-500/30'
+                }`}
           >
              <div className="flex justify-between items-center mb-1">
-                <span className="text-[10px] text-gray-500 font-mono">
-                    {msg.walletAddress || 'ANON'}
+                <span className={`text-[10px] font-mono ${msg.isChosen ? 'text-yellow-400 font-bold' : 'text-gray-500'}`}>
+                    {msg.walletAddress || 'ANON'} {msg.isChosen && '★ CHOSEN ONE'}
                 </span>
                 <span className="text-[10px] text-gray-600">
                     {new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                 </span>
              </div>
-             <p className="text-gray-300 font-light text-sm leading-relaxed font-oracle">
+             <p className={`${msg.isChosen ? 'text-yellow-100' : 'text-gray-300'} font-light text-sm leading-relaxed font-oracle`}>
                 "{msg.text}"
              </p>
-             <div className="mt-2 text-[10px] text-cyan-700 uppercase tracking-wide border-t border-white/5 pt-1 flex justify-between">
-                <span>Wish: Help via {msg.methodOfHelp}</span>
+             <div className="mt-2 text-[10px] uppercase tracking-wide border-t border-white/5 pt-1 flex justify-between">
+                <span className={msg.isChosen ? 'text-yellow-500' : 'text-cyan-700'}>
+                    Wish: {msg.methodOfHelp}
+                </span>
              </div>
+
+             {/* Oracle Prophecy Display if Chosen */}
+             {msg.isChosen && msg.prophecy && (
+                <div className="mt-2 pt-2 border-t border-yellow-500/20 text-[10px] text-yellow-300/80 italic font-serif">
+                    Oracle: "{msg.prophecy}"
+                </div>
+             )}
              
              {/* Decorative Corner */}
-             <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-cyan-500/50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+             <div className={`absolute top-0 right-0 w-2 h-2 border-t border-r transition-opacity 
+                ${msg.isChosen ? 'border-yellow-500 opacity-100' : 'border-cyan-500/50 opacity-0 group-hover:opacity-100'}`}>
+             </div>
           </div>
         ))}
       </div>
